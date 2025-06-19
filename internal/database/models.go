@@ -14,8 +14,8 @@ type Agent struct {
 	ID        uuid.UUID
 	FirstName string
 	LastName  string
-	CreatedAt string
-	UpdatedAt string
+	CreatedAt time.Time
+	UpdatedAt time.Time
 	Dept      string
 }
 
