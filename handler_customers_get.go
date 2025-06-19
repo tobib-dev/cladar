@@ -7,10 +7,6 @@ import (
 )
 
 func (cfg *apiConfig) handlerGetAllCustomers(w http.ResponseWriter, r *http.Request) {
-	type Response struct {
-		Customer
-	}
-
 	custList, err := cfg.db.GetAllCustomers(r.Context())
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, "Error pulling customers from database", err)

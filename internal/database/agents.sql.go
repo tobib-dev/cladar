@@ -9,20 +9,20 @@ import (
 	"context"
 )
 
-const createAgents = `-- name: CreateAgents :one
+const createAgent = `-- name: CreateAgent :one
 INSERT INTO agents (id, first_name, last_name, created_at, updated_at, dept)
-VALUES (gen_random_uuid, $1, $2, NOW(), NOW(), $3)
+VALUES (gen_random_uuid(), $1, $2, NOW(), NOW(), $3)
 RETURNING id, first_name, last_name, created_at, updated_at, dept
 `
 
-type CreateAgentsParams struct {
+type CreateAgentParams struct {
 	FirstName string
 	LastName  string
 	Dept      string
 }
 
-func (q *Queries) CreateAgents(ctx context.Context, arg CreateAgentsParams) (Agent, error) {
-	row := q.db.QueryRowContext(ctx, createAgents, arg.FirstName, arg.LastName, arg.Dept)
+func (q *Queries) CreateAgent(ctx context.Context, arg CreateAgentParams) (Agent, error) {
+	row := q.db.QueryRowContext(ctx, createAgent, arg.FirstName, arg.LastName, arg.Dept)
 	var i Agent
 	err := row.Scan(
 		&i.ID,

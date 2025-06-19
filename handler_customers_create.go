@@ -21,7 +21,7 @@ type Customer struct {
 	PolicyType string    `json:"policy_type"`
 }
 
-func (cfg *apiConfig) handlerCreateCustomers(w http.ResponseWriter, r *http.Request) {
+func (cfg *apiConfig) handlerCreateCustomer(w http.ResponseWriter, r *http.Request) {
 	type Response struct {
 		Customer
 	}
