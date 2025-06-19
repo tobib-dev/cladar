@@ -34,3 +34,37 @@ func (q *Queries) CreateAgent(ctx context.Context, arg CreateAgentParams) (Agent
 	)
 	return i, err
 }
+
+const getAllAgents = `-- name: GetAllAgents :many
+SELECT id, first_name, last_name, created_at, updated_at, dept FROM agents
+`
+
+func (q *Queries) GetAllAgents(ctx context.Context) ([]Agent, error) {
+	rows, err := q.db.QueryContext(ctx, getAllAgents)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Agent
+	for rows.Next() {
+		var i Agent
+		if err := rows.Scan(
+			&i.ID,
+			&i.FirstName,
+			&i.LastName,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.Dept,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
