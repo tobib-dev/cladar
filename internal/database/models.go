@@ -10,6 +10,15 @@ import (
 	"github.com/google/uuid"
 )
 
+type Agent struct {
+	ID        uuid.UUID
+	FirstName string
+	LastName  string
+	CreatedAt string
+	UpdatedAt string
+	Dept      string
+}
+
 type Customer struct {
 	ID         uuid.UUID
 	FirstName  string
