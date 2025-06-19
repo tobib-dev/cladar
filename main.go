@@ -58,5 +58,6 @@ func main() {
 	log.Printf("Serving on port: %s\n", port)
 
 	mux.HandleFunc("POST /api/customers", cfg.handlerCreateCustomers)
+	mux.HandleFunc("GET /api/customers", cfg.handlerGetAllCustomers)
 	log.Fatal(srv.ListenAndServe())
 }

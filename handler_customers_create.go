@@ -10,15 +10,15 @@ import (
 )
 
 type Customer struct {
-	ID         uuid.UUIDs `json:"id"`
-	FirstName  string     `json:"first_name"`
-	LastName   string     `json:"last_name"`
-	CreatedAt  time.Time  `json:"created_at"`
-	UpdatedAt  time.Time  `json:"updated_at"`
-	Email      string     `json:"email"`
-	Phone      string     `json:"phone"`
-	Home       string     `json:"home"`
-	PolicyType string     `json:"policy_type"`
+	ID         uuid.UUID `json:"id"`
+	FirstName  string    `json:"first_name"`
+	LastName   string    `json:"last_name"`
+	CreatedAt  time.Time `json:"created_at"`
+	UpdatedAt  time.Time `json:"updated_at"`
+	Email      string    `json:"email"`
+	Phone      string    `json:"phone"`
+	Home       string    `json:"home"`
+	PolicyType string    `json:"policy_type"`
 }
 
 func (cfg *apiConfig) handlerCreateCustomers(w http.ResponseWriter, r *http.Request) {
