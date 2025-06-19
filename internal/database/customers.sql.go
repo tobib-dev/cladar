@@ -47,3 +47,40 @@ func (q *Queries) CreateCustomer(ctx context.Context, arg CreateCustomerParams) 
 	)
 	return i, err
 }
+
+const getAllCustomers = `-- name: GetAllCustomers :many
+SELECT id, first_name, last_name, created_at, updated_at, email, phone, home, policy_type FROM customers
+`
+
+func (q *Queries) GetAllCustomers(ctx context.Context) ([]Customer, error) {
+	rows, err := q.db.QueryContext(ctx, getAllCustomers)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Customer
+	for rows.Next() {
+		var i Customer
+		if err := rows.Scan(
+			&i.ID,
+			&i.FirstName,
+			&i.LastName,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.Email,
+			&i.Phone,
+			&i.Home,
+			&i.PolicyType,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
