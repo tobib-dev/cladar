@@ -6,6 +6,7 @@ CREATE TABLE customers (
     created_at TIMESTAMP NOT NULL,
     updated_at TIMESTAMP NOT NULL,
     email TEXT NOT NULL UNIQUE,
+    phone TEXT NOT NULL UNIQUE,
     home TEXT NOT NULL UNIQUE,
     policy_type TEXT NOT NULL
 );

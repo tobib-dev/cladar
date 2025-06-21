@@ -10,19 +10,25 @@ import (
 )
 
 const createAgent = `-- name: CreateAgent :one
-INSERT INTO agents (id, first_name, last_name, created_at, updated_at, dept)
-VALUES (gen_random_uuid(), $1, $2, NOW(), NOW(), $3)
-RETURNING id, first_name, last_name, created_at, updated_at, dept
+INSERT INTO agents (id, first_name, last_name, created_at, updated_at, email, dept)
+VALUES (gen_random_uuid(), $1, $2, NOW(), NOW(), $3, $4)
+RETURNING id, first_name, last_name, created_at, updated_at, email, dept
 `
 
 type CreateAgentParams struct {
 	FirstName string
 	LastName  string
+	Email     string
 	Dept      string
 }
 
 func (q *Queries) CreateAgent(ctx context.Context, arg CreateAgentParams) (Agent, error) {
-	row := q.db.QueryRowContext(ctx, createAgent, arg.FirstName, arg.LastName, arg.Dept)
+	row := q.db.QueryRowContext(ctx, createAgent,
+		arg.FirstName,
+		arg.LastName,
+		arg.Email,
+		arg.Dept,
+	)
 	var i Agent
 	err := row.Scan(
 		&i.ID,
@@ -30,13 +36,14 @@ func (q *Queries) CreateAgent(ctx context.Context, arg CreateAgentParams) (Agent
 		&i.LastName,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.Email,
 		&i.Dept,
 	)
 	return i, err
 }
 
 const getAllAgents = `-- name: GetAllAgents :many
-SELECT id, first_name, last_name, created_at, updated_at, dept FROM agents
+SELECT id, first_name, last_name, created_at, updated_at, email, dept FROM agents
 `
 
 func (q *Queries) GetAllAgents(ctx context.Context) ([]Agent, error) {
@@ -54,6 +61,7 @@ func (q *Queries) GetAllAgents(ctx context.Context) ([]Agent, error) {
 			&i.LastName,
 			&i.CreatedAt,
 			&i.UpdatedAt,
+			&i.Email,
 			&i.Dept,
 		); err != nil {
 			return nil, err

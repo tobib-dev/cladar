@@ -15,6 +15,7 @@ type Agent struct {
 	LastName  string    `json:"last_name"`
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
+	Email     string    `json:"email"`
 	Dept      string    `json:"dept"`
 }
 
@@ -22,6 +23,7 @@ func (cfg *apiConfig) handlerCreateAgent(w http.ResponseWriter, r *http.Request)
 	type Parameters struct {
 		FirstName string `json:"first_name"`
 		LastName  string `json:"last_name"`
+		Email     string `json:"email"`
 		Dept      string `json:"dept"`
 	}
 
@@ -40,6 +42,7 @@ func (cfg *apiConfig) handlerCreateAgent(w http.ResponseWriter, r *http.Request)
 	agent, err := cfg.db.CreateAgent(r.Context(), database.CreateAgentParams{
 		FirstName: params.FirstName,
 		LastName:  params.LastName,
+		Email:     params.Email,
 		Dept:      params.Dept,
 	})
 	if err != nil {
@@ -51,6 +54,7 @@ func (cfg *apiConfig) handlerCreateAgent(w http.ResponseWriter, r *http.Request)
 		Agent: Agent{
 			FirstName: agent.FirstName,
 			LastName:  agent.LastName,
+			Email:     agent.Email,
 			Dept:      agent.Dept,
 		},
 	})

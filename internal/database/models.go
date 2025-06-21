@@ -16,6 +16,7 @@ type Agent struct {
 	LastName  string
 	CreatedAt time.Time
 	UpdatedAt time.Time
+	Email     string
 	Dept      string
 }
 
