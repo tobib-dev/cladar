@@ -5,6 +5,7 @@ CREATE TABLE agents (
 	last_name TEXT NOT NULL,
 	created_at TIMESTAMP NOT NULL,
 	updated_at TIMESTAMP NOT NULL,
+	email TEXT NOT NULL UNIQUE,
 	dept TEXT NOT NULL
 );
 
