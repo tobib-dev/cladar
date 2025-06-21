@@ -21,3 +21,30 @@ func (q *Queries) CreateDept(ctx context.Context, deptName string) (Department, 
 	err := row.Scan(&i.ID, &i.DeptName)
 	return i, err
 }
+
+const getAllDept = `-- name: GetAllDept :many
+SELECT id, dept_name FROM departments
+`
+
+func (q *Queries) GetAllDept(ctx context.Context) ([]Department, error) {
+	rows, err := q.db.QueryContext(ctx, getAllDept)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Department
+	for rows.Next() {
+		var i Department
+		if err := rows.Scan(&i.ID, &i.DeptName); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
