@@ -48,3 +48,15 @@ func (q *Queries) GetAllDept(ctx context.Context) ([]Department, error) {
 	}
 	return items, nil
 }
+
+const getDeptByID = `-- name: GetDeptByID :one
+SELECT id, dept_name FROM departments
+WHERE dept_name = $1
+`
+
+func (q *Queries) GetDeptByID(ctx context.Context, deptName string) (Department, error) {
+	row := q.db.QueryRowContext(ctx, getDeptByID, deptName)
+	var i Department
+	err := row.Scan(&i.ID, &i.DeptName)
+	return i, err
+}

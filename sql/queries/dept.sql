@@ -6,3 +6,7 @@ RETURNING *;
 
 -- name: GetAllDept :many
 SELECT * FROM departments;
+
+-- name: GetDeptByID :one
+SELECT * FROM departments
+WHERE dept_name = $1;
