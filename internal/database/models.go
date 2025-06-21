@@ -31,3 +31,16 @@ type Customer struct {
 	Home       string
 	PolicyType string
 }
+
+type Department struct {
+	ID       uuid.UUID
+	DeptName string
+}
+
+type Manager struct {
+	ID        uuid.UUID
+	FirstName string
+	LastName  string
+	Email     string
+	DeptID    uuid.UUID
+}
