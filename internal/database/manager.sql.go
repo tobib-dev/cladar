@@ -41,3 +41,36 @@ func (q *Queries) CreateManager(ctx context.Context, arg CreateManagerParams) (M
 	)
 	return i, err
 }
+
+const getAllManagers = `-- name: GetAllManagers :many
+SELECT id, first_name, last_name, email, dept_id FROM managers
+`
+
+func (q *Queries) GetAllManagers(ctx context.Context) ([]Manager, error) {
+	rows, err := q.db.QueryContext(ctx, getAllManagers)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Manager
+	for rows.Next() {
+		var i Manager
+		if err := rows.Scan(
+			&i.ID,
+			&i.FirstName,
+			&i.LastName,
+			&i.Email,
+			&i.DeptID,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}

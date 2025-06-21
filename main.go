@@ -67,6 +67,7 @@ func main() {
 	mux.HandleFunc("GET /api/departments", cfg.handlerGetAllDepts)
 
 	mux.HandleFunc("POST /api/managers", cfg.handlerCreateManager)
+	mux.HandleFunc("GET /api/managers", cfg.handlerGetAllManagers)
 
 	//mux.HandleFunc("POST /api/reset", cfg.handlerReset)
 	log.Fatal(srv.ListenAndServe())
