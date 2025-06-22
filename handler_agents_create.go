@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/tobib-dev/cladar/internal/auth"
 	"github.com/tobib-dev/cladar/internal/database"
 )
 
@@ -25,6 +26,7 @@ func (cfg *apiConfig) handlerCreateAgent(w http.ResponseWriter, r *http.Request)
 		LastName  string `json:"last_name"`
 		Email     string `json:"email"`
 		Dept      string `json:"dept"`
+		Password  string `json:"password"`
 	}
 
 	type Response struct {
@@ -47,6 +49,23 @@ func (cfg *apiConfig) handlerCreateAgent(w http.ResponseWriter, r *http.Request)
 	})
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, "Couldn't create agent", err)
+		return
+	}
+
+	hashedPassword, err := auth.HashPassword(params.Password)
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, "Couldn't hash password", err)
+		return
+	}
+
+	_, err = cfg.db.CreateUser(r.Context(), database.CreateUserParams{
+		Email:    agent.Email,
+		Pswd:     hashedPassword,
+		UserRole: database.UserType(UserRoleAgent),
+		RoleID:   agent.ID,
+	})
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, "Couldn't create user account", err)
 		return
 	}
 
