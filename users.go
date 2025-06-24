@@ -5,9 +5,8 @@ import "github.com/google/uuid"
 type UserType string
 
 const (
-	UserRoleAgent    UserType = "agent"
-	UserRoleCustomer UserType = "customer"
-	UserRoleManager  UserType = "manager"
+	UserRoleAgent   UserType = "agent"
+	UserRoleManager UserType = "manager"
 )
 
 type User struct {

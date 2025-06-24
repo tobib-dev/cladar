@@ -1,5 +1,10 @@
 -- +goose Up
-CREATE TYPE user_type AS ENUM ('customer', 'agent', 'manager');
+CREATE TYPE user_type_new AS ENUM ('agent', 'manager');
+
+DROP TABLE IF EXISTS users;
+DROP TYPE user_type;
+
+ALTER TYPE user_type_new RENAME TO user_type;
 
 CREATE TABLE users (
     id UUID PRIMARY KEY,
@@ -11,3 +16,4 @@ CREATE TABLE users (
 
 -- +goose Down
 DROP TABLE users;
+DROP TYPE user_type;
