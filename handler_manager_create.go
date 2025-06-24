@@ -22,6 +22,7 @@ func (cfg *apiConfig) handlerCreateManager(w http.ResponseWriter, r *http.Reques
 		LastName  string `json:"last_name"`
 		Email     string `json:"email"`
 		DeptName  string `json:"dept"`
+		Password  string `json:"password"`
 	}
 
 	type Response struct {
@@ -50,6 +51,17 @@ func (cfg *apiConfig) handlerCreateManager(w http.ResponseWriter, r *http.Reques
 	})
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, "Couldn't create manager", err)
+		return
+	}
+
+	_, err = cfg.db.CreateUser(r.Context(), database.CreateUserParams{
+		Email:    params.Email,
+		Pswd:     params.Password,
+		UserRole: database.UserTypeManager,
+		RoleID:   mang.ID,
+	})
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, "Couldn't create user account for manager", err)
 		return
 	}
 

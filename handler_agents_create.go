@@ -61,7 +61,7 @@ func (cfg *apiConfig) handlerCreateAgent(w http.ResponseWriter, r *http.Request)
 	_, err = cfg.db.CreateUser(r.Context(), database.CreateUserParams{
 		Email:    agent.Email,
 		Pswd:     hashedPassword,
-		UserRole: database.UserType(UserRoleAgent),
+		UserRole: database.UserTypeAgent,
 		RoleID:   agent.ID,
 	})
 	if err != nil {
