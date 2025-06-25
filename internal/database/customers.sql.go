@@ -7,6 +7,8 @@ package database
 
 import (
 	"context"
+
+	"github.com/google/uuid"
 )
 
 const createCustomer = `-- name: CreateCustomer :one
@@ -83,4 +85,26 @@ func (q *Queries) GetAllCustomers(ctx context.Context) ([]Customer, error) {
 		return nil, err
 	}
 	return items, nil
+}
+
+const getCustomerByID = `-- name: GetCustomerByID :one
+SELECT id, first_name, last_name, created_at, updated_at, email, phone, home, policy_type FROM customers
+WHERE id=$1
+`
+
+func (q *Queries) GetCustomerByID(ctx context.Context, id uuid.UUID) (Customer, error) {
+	row := q.db.QueryRowContext(ctx, getCustomerByID, id)
+	var i Customer
+	err := row.Scan(
+		&i.ID,
+		&i.FirstName,
+		&i.LastName,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.Email,
+		&i.Phone,
+		&i.Home,
+		&i.PolicyType,
+	)
+	return i, err
 }

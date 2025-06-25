@@ -5,3 +5,7 @@ RETURNING *;
 
 -- name: GetAllCustomers :many
 SELECT * FROM customers;
+
+-- name: GetCustomerByID :one
+SELECT * FROM customers
+WHERE id=$1;
