@@ -5,7 +5,6 @@ import (
 	"net/http"
 
 	"github.com/google/uuid"
-	"github.com/tobib-dev/cladar/auth"
 	"github.com/tobib-dev/cladar/internal/auth"
 	"github.com/tobib-dev/cladar/internal/database"
 )
