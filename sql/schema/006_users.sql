@@ -2,7 +2,7 @@
 CREATE TYPE user_type_new AS ENUM ('agent', 'manager');
 
 DROP TABLE IF EXISTS users;
-DROP TYPE user_type;
+DROP TYPE IF EXISTS user_type;
 
 ALTER TYPE user_type_new RENAME TO user_type;
 
