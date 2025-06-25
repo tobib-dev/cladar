@@ -33,14 +33,10 @@ func (cfg *apiConfig) handlerGetAllCustomers(w http.ResponseWriter, r *http.Requ
 }
 
 func (cfg *apiConfig) handlerGetCustomer(w http.ResponseWriter, r *http.Request) {
-	type Response struct {
-		Customer
-	}
-
-	idString := r.URL.Query().Get("id")
+	idString := r.PathValue("custID")
 	custID, err := uuid.Parse(idString)
 	if err != nil {
-		respondWithError(w, http.StatusInternalServerError, "Error parsing customer id", err)
+		respondWithError(w, http.StatusBadRequest, "Invalid customer id", err)
 		return
 	}
 
@@ -61,15 +57,13 @@ func (cfg *apiConfig) handlerGetCustomer(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	respondWithJson(w, http.StatusOK, Response{
-		Customer: Customer{
-			ID:         cust.ID,
-			FirstName:  cust.FirstName,
-			LastName:   cust.LastName,
-			Email:      cust.Email,
-			Phone:      cust.Phone,
-			Home:       cust.Home,
-			PolicyType: cust.PolicyType,
-		},
+	respondWithJson(w, http.StatusOK, Customer{
+		ID:         cust.ID,
+		FirstName:  cust.FirstName,
+		LastName:   cust.LastName,
+		Email:      cust.Email,
+		Phone:      cust.Phone,
+		Home:       cust.Home,
+		PolicyType: cust.PolicyType,
 	})
 }
