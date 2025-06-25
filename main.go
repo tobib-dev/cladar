@@ -40,6 +40,9 @@ func main() {
 	}
 
 	JWT_TOKEN := os.Getenv("JWT_TOKEN")
+	if JWT_TOKEN == "" {
+		log.Fatalf("JWT TOKEN must be set")
+	}
 
 	cfg := apiConfig{
 		db:        dbQueries,
