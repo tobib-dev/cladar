@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"net/http"
+	"time"
 
 	"github.com/tobib-dev/cladar/internal/auth"
 )
@@ -15,6 +16,7 @@ func (cfg *apiConfig) handlerLogin(w http.ResponseWriter, r *http.Request) {
 
 	type Response struct {
 		User
+		Token string `json:"token"`
 	}
 
 	params := Parameters{}
@@ -36,11 +38,14 @@ func (cfg *apiConfig) handlerLogin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	tokenString, err := auth.MakeJWT(user.ID, cfg.JWT_TOKEN, time.Hour)
+
 	respondWithJson(w, http.StatusOK, Response{
 		User: User{
 			ID:       user.ID,
 			Email:    user.Email,
 			UserRole: UserType(user.UserRole),
 		},
+		Token: tokenString,
 	})
 }
