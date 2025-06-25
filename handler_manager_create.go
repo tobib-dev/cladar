@@ -5,6 +5,8 @@ import (
 	"net/http"
 
 	"github.com/google/uuid"
+	"github.com/tobib-dev/cladar/auth"
+	"github.com/tobib-dev/cladar/internal/auth"
 	"github.com/tobib-dev/cladar/internal/database"
 )
 
@@ -54,9 +56,10 @@ func (cfg *apiConfig) handlerCreateManager(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
+	hashPwd, err := auth.HashPassword(params.Password)
 	_, err = cfg.db.CreateUser(r.Context(), database.CreateUserParams{
 		Email:    params.Email,
-		Pswd:     params.Password,
+		Pswd:     hashPwd,
 		UserRole: database.UserTypeManager,
 		RoleID:   mang.ID,
 	})
