@@ -1,8 +1,8 @@
 package main
 
 import (
+	"database/sql"
 	"encoding/json"
-	"log"
 	"net/http"
 
 	"github.com/google/uuid"
@@ -36,17 +36,19 @@ func (cfg *apiConfig) handlerUpdateCustomer(w http.ResponseWriter, r *http.Reque
 		respondWithError(w, http.StatusUnauthorized, "Couldn't get bearer token", err)
 		return
 	}
-	agentID, err := auth.ValidateJWT(token, cfg.JWT_TOKEN)
+	userID, err := auth.ValidateJWT(token, cfg.JWT_TOKEN)
 	if err != nil {
 		respondWithError(w, http.StatusUnauthorized, "Couldn't validate token", err)
 		return
 	}
 
-	agent, err := cfg.db.GetAgentByID(r.Context(), agentID)
-	if err != nil || agentID != agent.ID {
-		log.Println(agentID)
-		log.Println(agent.ID)
-		respondWithError(w, http.StatusUnauthorized, "Unauthorized, only agents can update customers", err)
+	_, err = cfg.db.GetUserById(r.Context(), userID)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			respondWithError(w, http.StatusForbidden, "Access Denied, user does not exist or is unauthorized", err)
+		} else {
+			respondWithError(w, http.StatusInternalServerError, "Couldn't verify customer", err)
+		}
 		return
 	}
 
