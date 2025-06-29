@@ -47,7 +47,7 @@ func (cfg *apiConfig) handlerUpdateCustomer(w http.ResponseWriter, r *http.Reque
 		if err == sql.ErrNoRows {
 			respondWithError(w, http.StatusForbidden, "Access Denied, user does not exist or is unauthorized", err)
 		} else {
-			respondWithError(w, http.StatusInternalServerError, "Couldn't verify customer", err)
+			respondWithError(w, http.StatusInternalServerError, "Couldn't verify user", err)
 		}
 		return
 	}
