@@ -5,3 +5,7 @@ RETURNING *;
 
 -- name: GetAllAgents :many
 SELECT * FROM agents;
+
+-- name: GetAgentByID :one
+SELECT * FROM agents
+WHERE id = $1;

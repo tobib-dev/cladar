@@ -5,12 +5,56 @@
 package database
 
 import (
+	"database/sql"
 	"database/sql/driver"
 	"fmt"
 	"time"
 
 	"github.com/google/uuid"
 )
+
+type Status string
+
+const (
+	StatusDeclined  Status = "declined"
+	StatusAwarded   Status = "awarded"
+	StatusCompleted Status = "completed"
+)
+
+func (e *Status) Scan(src interface{}) error {
+	switch s := src.(type) {
+	case []byte:
+		*e = Status(s)
+	case string:
+		*e = Status(s)
+	default:
+		return fmt.Errorf("unsupported scan type for Status: %T", src)
+	}
+	return nil
+}
+
+type NullStatus struct {
+	Status Status
+	Valid  bool // Valid is true if Status is not NULL
+}
+
+// Scan implements the Scanner interface.
+func (ns *NullStatus) Scan(value interface{}) error {
+	if value == nil {
+		ns.Status, ns.Valid = "", false
+		return nil
+	}
+	ns.Valid = true
+	return ns.Status.Scan(value)
+}
+
+// Value implements the driver Valuer interface.
+func (ns NullStatus) Value() (driver.Value, error) {
+	if !ns.Valid {
+		return nil, nil
+	}
+	return string(ns.Status), nil
+}
 
 type UserType string
 
@@ -62,6 +106,17 @@ type Agent struct {
 	UpdatedAt time.Time
 	Email     string
 	Dept      string
+}
+
+type Claim struct {
+	ID            uuid.UUID
+	CustomerID    uuid.UUID
+	AgentID       uuid.UUID
+	ClaimType     string
+	CreatedAt     time.Time
+	UpdatedAt     time.Time
+	CurrentStatus Status
+	Award         sql.NullFloat64
 }
 
 type Customer struct {

@@ -1,5 +1,5 @@
 -- +goose Up
-CREATE type STATUS AS ENUM ('declined', 'awarded', 'completed')
+CREATE type STATUS AS ENUM ('declined', 'awarded', 'completed');
 
 CREATE TABLE claims(
     id UUID PRIMARY KEY,
@@ -9,7 +9,7 @@ CREATE TABLE claims(
     created_at TIMESTAMP NOT NULL,
     updated_at TIMESTAMP NOT NULL,
     current_status STATUS NOT NULL,
-    award REAL,
+    award REAL
 );
 
 -- +goose Down

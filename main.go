@@ -63,6 +63,7 @@ func main() {
 	mux.HandleFunc("POST /api/customers", cfg.handlerCreateCustomer)
 	mux.HandleFunc("GET /api/customers", cfg.handlerGetAllCustomers)
 	mux.HandleFunc("GET /api/customers/{custID}", cfg.handlerGetCustomer)
+	mux.HandleFunc("PUT /api/customers/{custID}", cfg.handlerUpdateCustomer)
 
 	mux.HandleFunc("POST /api/agents", cfg.handlerCreateAgent)
 	mux.HandleFunc("GET /api/agents", cfg.handlerGetAllAgents)

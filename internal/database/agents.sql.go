@@ -7,6 +7,8 @@ package database
 
 import (
 	"context"
+
+	"github.com/google/uuid"
 )
 
 const createAgent = `-- name: CreateAgent :one
@@ -29,6 +31,26 @@ func (q *Queries) CreateAgent(ctx context.Context, arg CreateAgentParams) (Agent
 		arg.Email,
 		arg.Dept,
 	)
+	var i Agent
+	err := row.Scan(
+		&i.ID,
+		&i.FirstName,
+		&i.LastName,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.Email,
+		&i.Dept,
+	)
+	return i, err
+}
+
+const getAgentByID = `-- name: GetAgentByID :one
+SELECT id, first_name, last_name, created_at, updated_at, email, dept FROM agents
+WHERE id = $1
+`
+
+func (q *Queries) GetAgentByID(ctx context.Context, id uuid.UUID) (Agent, error) {
+	row := q.db.QueryRowContext(ctx, getAgentByID, id)
 	var i Agent
 	err := row.Scan(
 		&i.ID,

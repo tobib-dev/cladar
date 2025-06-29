@@ -9,3 +9,15 @@ SELECT * FROM customers;
 -- name: GetCustomerByID :one
 SELECT * FROM customers
 WHERE id=$1;
+
+-- name: UpdateCustomer :one
+UPDATE customers
+SET first_name = COALESCE($2, first_name),
+    last_name = COALESCE($3, last_name),
+    updated_at = NOW(),
+    email = COALESCE($4, email),
+    phone = COALESCE($5, phone),
+    home = COALESCE($6, home),
+    policy_type = COALESCE($7, policy_type)
+WHERE id = $1
+RETURNING *;

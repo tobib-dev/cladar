@@ -108,3 +108,51 @@ func (q *Queries) GetCustomerByID(ctx context.Context, id uuid.UUID) (Customer, 
 	)
 	return i, err
 }
+
+const updateCustomer = `-- name: UpdateCustomer :one
+UPDATE customers
+SET first_name = COALESCE($2, first_name),
+    last_name = COALESCE($3, last_name),
+    updated_at = NOW(),
+    email = COALESCE($4, email),
+    phone = COALESCE($5, phone),
+    home = COALESCE($6, home),
+    policy_type = COALESCE($7, policy_type)
+WHERE id = $1
+RETURNING id, first_name, last_name, created_at, updated_at, email, phone, home, policy_type
+`
+
+type UpdateCustomerParams struct {
+	ID         uuid.UUID
+	FirstName  string
+	LastName   string
+	Email      string
+	Phone      string
+	Home       string
+	PolicyType string
+}
+
+func (q *Queries) UpdateCustomer(ctx context.Context, arg UpdateCustomerParams) (Customer, error) {
+	row := q.db.QueryRowContext(ctx, updateCustomer,
+		arg.ID,
+		arg.FirstName,
+		arg.LastName,
+		arg.Email,
+		arg.Phone,
+		arg.Home,
+		arg.PolicyType,
+	)
+	var i Customer
+	err := row.Scan(
+		&i.ID,
+		&i.FirstName,
+		&i.LastName,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.Email,
+		&i.Phone,
+		&i.Home,
+		&i.PolicyType,
+	)
+	return i, err
+}
