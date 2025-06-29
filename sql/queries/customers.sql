@@ -21,3 +21,7 @@ SET first_name = COALESCE($2, first_name),
     policy_type = COALESCE($7, policy_type)
 WHERE id = $1
 RETURNING *;
+
+-- name: DeleteCustomer :exec
+DELETE FROM customers
+WHERE id = $1;
