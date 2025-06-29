@@ -60,14 +60,49 @@ func (cfg *apiConfig) handlerUpdateCustomer(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
+	oldCust, err := cfg.db.GetCustomerByID(r.Context(), custID)
+	if err != nil {
+		respondWithError(w, http.StatusNotFound, "Couldn't find customer", err)
+		return
+	}
+	fName := oldCust.FirstName
+	if params.FirstName != "" {
+		fName = params.FirstName
+	}
+
+	lName := oldCust.LastName
+	if params.LastName != "" {
+		lName = params.LastName
+	}
+
+	email := oldCust.Email
+	if params.Email != "" {
+		email = params.Email
+	}
+
+	phone := oldCust.Phone
+	if params.Phone != "" {
+		phone = params.Phone
+	}
+
+	home := oldCust.Home
+	if params.Home != "" {
+		home = params.Home
+	}
+
+	policyType := oldCust.PolicyType
+	if params.PolicyType != "" {
+		policyType = params.PolicyType
+	}
+
 	cust, err := cfg.db.UpdateCustomer(r.Context(), database.UpdateCustomerParams{
 		ID:         custID,
-		FirstName:  params.FirstName,
-		LastName:   params.LastName,
-		Email:      params.Email,
-		Phone:      params.Phone,
-		Home:       params.Home,
-		PolicyType: params.PolicyType,
+		FirstName:  fName,
+		LastName:   lName,
+		Email:      email,
+		Phone:      phone,
+		Home:       home,
+		PolicyType: policyType,
 	})
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, "Couldn't update customer", err)
