@@ -33,9 +33,24 @@ func (cfg *apiConfig) handlerCreateAgent(w http.ResponseWriter, r *http.Request)
 		Agent
 	}
 
+	bearerToken, err := auth.GetBearerToken(r.Header)
+	if err != nil {
+		respondWithError(w, http.StatusBadRequest, "Couldn't get bearer token", err)
+		return
+	}
+	user, err := cfg.db.GetUserFromToken(r.Context(), bearerToken)
+	if err != nil {
+		respondWithError(w, http.StatusUnauthorized, "Couldn't validate token", err)
+		return
+	}
+	if user.UserRole != database.UserType(UserRoleManager) {
+		respondWithError(w, http.StatusUnauthorized, "Only managers have permission to create agents", err)
+		return
+	}
+
 	params := Parameters{}
 	decoder := json.NewDecoder(r.Body)
-	err := decoder.Decode(&params)
+	err = decoder.Decode(&params)
 	if err != nil {
 		respondWithError(w, http.StatusBadRequest, "Couldn't decode parameters", err)
 		return

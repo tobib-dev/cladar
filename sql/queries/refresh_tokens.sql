@@ -20,3 +20,8 @@ SET revoked_at = NOW(),
     updated_at = NOW()
 where token = $1
 RETURNING *;
+
+-- name: GetUserFromToken :one
+SELECT * FROM refresh_tokens
+JOIN users ON users.id = refresh_tokens.user_id
+WHERE refresh_tokens.token = $1;

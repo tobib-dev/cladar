@@ -32,6 +32,45 @@ func (q *Queries) GetRefreshToken(ctx context.Context, token string) (RefreshTok
 	return i, err
 }
 
+const getUserFromToken = `-- name: GetUserFromToken :one
+SELECT token, created_at, updated_at, user_id, expires_at, revoked_at, id, email, pswd, user_role, role_id FROM refresh_tokens
+JOIN users ON users.id = refresh_tokens.user_id
+WHERE refresh_tokens.token = $1
+`
+
+type GetUserFromTokenRow struct {
+	Token     string
+	CreatedAt time.Time
+	UpdatedAt time.Time
+	UserID    uuid.UUID
+	ExpiresAt time.Time
+	RevokedAt sql.NullTime
+	ID        uuid.UUID
+	Email     string
+	Pswd      string
+	UserRole  UserType
+	RoleID    uuid.UUID
+}
+
+func (q *Queries) GetUserFromToken(ctx context.Context, token string) (GetUserFromTokenRow, error) {
+	row := q.db.QueryRowContext(ctx, getUserFromToken, token)
+	var i GetUserFromTokenRow
+	err := row.Scan(
+		&i.Token,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.UserID,
+		&i.ExpiresAt,
+		&i.RevokedAt,
+		&i.ID,
+		&i.Email,
+		&i.Pswd,
+		&i.UserRole,
+		&i.RoleID,
+	)
+	return i, err
+}
+
 const revokeToken = `-- name: RevokeToken :one
 UPDATE refresh_tokens
 SET revoked_at = NOW(),
