@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/tobib-dev/cladar/internal/auth"
+	"github.com/tobib-dev/cladar/internal/database"
 )
 
 func (cfg *apiConfig) handlerLogin(w http.ResponseWriter, r *http.Request) {
@@ -16,7 +17,8 @@ func (cfg *apiConfig) handlerLogin(w http.ResponseWriter, r *http.Request) {
 
 	type Response struct {
 		User
-		Token string `json:"token"`
+		Token        string `json:"token"`
+		RefreshToken string `json:"refresh_token"`
 	}
 
 	params := Parameters{}
@@ -39,6 +41,21 @@ func (cfg *apiConfig) handlerLogin(w http.ResponseWriter, r *http.Request) {
 	}
 
 	tokenString, err := auth.MakeJWT(user.ID, cfg.JWT_TOKEN, time.Hour)
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, "Couldn't generate JWT token", err)
+		return
+	}
+	token, err := auth.MakeRefreshToken()
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, "Couldn't generate refresh token", err)
+		return
+	}
+
+	rToken, err := cfg.db.StoreRefreshToken(r.Context(), database.StoreRefreshTokenParams{
+		Token:     token,
+		UserID:    user.ID,
+		ExpiresAt: time.Now().Add(time.Hour * 1440),
+	})
 
 	respondWithJson(w, http.StatusOK, Response{
 		User: User{
@@ -46,6 +63,7 @@ func (cfg *apiConfig) handlerLogin(w http.ResponseWriter, r *http.Request) {
 			Email:    user.Email,
 			UserRole: UserType(user.UserRole),
 		},
-		Token: tokenString,
+		Token:        tokenString,
+		RefreshToken: rToken.Token,
 	})
 }
