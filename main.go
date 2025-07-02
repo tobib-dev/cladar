@@ -77,6 +77,7 @@ func main() {
 
 	mux.HandleFunc("POST /api/login", cfg.handlerLogin)
 	mux.HandleFunc("POST /api/refresh", cfg.handlerRefreshTokens)
+	mux.HandleFunc("POST /api/revoke", cfg.handlerRevokeTokens)
 
 	//mux.HandleFunc("POST /api/reset", cfg.handlerReset)
 	log.Fatal(srv.ListenAndServe())

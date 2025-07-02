@@ -55,3 +55,25 @@ func (cfg *apiConfig) handlerRefreshTokens(w http.ResponseWriter, r *http.Reques
 		RefreshToken: freshToken,
 	})
 }
+
+func (cfg *apiConfig) handlerRevokeTokens(w http.ResponseWriter, r *http.Request) {
+	bearerToken, err := auth.GetBearerToken(r.Header)
+	if err != nil {
+		respondWithError(w, http.StatusBadRequest, "Couldn't get bearer token", err)
+		return
+	}
+
+	refreshToken, err := cfg.db.GetRefreshToken(r.Context(), bearerToken)
+	if err != nil {
+		respondWithError(w, http.StatusUnauthorized, "Couldn't validate bearer token", err)
+		return
+	}
+
+	_, err = cfg.db.RevokeToken(r.Context(), refreshToken.Token)
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, "Couldn't revoke token", err)
+		return
+	}
+
+	w.WriteHeader(http.StatusNoContent)
+}

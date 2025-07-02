@@ -13,3 +13,10 @@ SET token = $2,
     updated_at = NOW()
 WHERE token = $1
 RETURNING *;
+
+-- name: RevokeToken :one
+UPDATE refresh_tokens
+SET revoked_at = NOW(),
+    updated_at = NOW()
+where token = $1
+RETURNING *;
