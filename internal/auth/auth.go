@@ -1,6 +1,8 @@
 package auth
 
 import (
+	"crypto/rand"
+	"encoding/hex"
 	"errors"
 	"net/http"
 	"strings"
@@ -75,4 +77,12 @@ func GetBearerToken(headers http.Header) (string, error) {
 		return "", errors.New("Wrong format must be in <Bearer TOKEN>")
 	}
 	return splitBearer[1], nil
+}
+
+func MakeRefreshToken() (string, error) {
+	key := make([]byte, 32)
+	rand.Read(key)
+
+	refreshToken := hex.EncodeToString(key)
+	return refreshToken, nil
 }
