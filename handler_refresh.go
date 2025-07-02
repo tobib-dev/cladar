@@ -10,22 +10,22 @@ import (
 
 func (cfg *apiConfig) handlerRefreshTokens(w http.ResponseWriter, r *http.Request) {
 	type Response struct {
-		Token string `json:"token"`
+		AccessToken  string `json:"access_token"`
+		RefreshToken string `json:"refresh_token"`
 	}
-	token, err := auth.GetBearerToken(r.Header)
+	bearerToken, err := auth.GetBearerToken(r.Header)
 	if err != nil {
 		respondWithError(w, http.StatusBadRequest, "Couldn't get bearer token", err)
 		return
 	}
 
-	rToken, err := cfg.db.GetRefreshToken(r.Context(), token)
+	rToken, err := cfg.db.GetRefreshToken(r.Context(), bearerToken)
 	if err != nil {
 		respondWithError(w, http.StatusUnauthorized, "Couldn't validate token", err)
 		return
 	}
-
-	if rToken.ExpiresAt.Before(time.Now()) {
-		respondWithError(w, http.StatusUnauthorized, "Tokens have expired", err)
+	if rToken.ExpiresAt.Before(time.Now()) || rToken.RevokedAt.Valid {
+		respondWithError(w, http.StatusUnauthorized, "Tokens have expired or revoked", err)
 		return
 	}
 
@@ -35,7 +35,7 @@ func (cfg *apiConfig) handlerRefreshTokens(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	updatedToken, err := cfg.db.UpdateRefreshToken(r.Context(), database.UpdateRefreshTokenParams{
+	_, err = cfg.db.UpdateRefreshToken(r.Context(), database.UpdateRefreshTokenParams{
 		Token:   rToken.Token,
 		Token_2: freshToken,
 	})
@@ -44,7 +44,14 @@ func (cfg *apiConfig) handlerRefreshTokens(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
+	accessToken, err := auth.MakeJWT(rToken.UserID, cfg.JWT_TOKEN, time.Minute*15)
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, "Couldn't generate new access token", err)
+		return
+	}
+
 	respondWithJson(w, http.StatusOK, Response{
-		Token: updatedToken.Token,
+		AccessToken:  accessToken,
+		RefreshToken: freshToken,
 	})
 }
