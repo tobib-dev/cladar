@@ -1,0 +1,2 @@
+-- +goose Up
+ALTER TYPE STATUS ADD VALUE IF NOT EXISTS 'pending';
