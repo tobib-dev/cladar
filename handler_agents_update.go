@@ -52,11 +52,20 @@ func (cfg *apiConfig) handlerUpdateAgents(w http.ResponseWriter, r *http.Request
 		respondWithError(w, http.StatusUnauthorized, "Token is expired or has been revoked, please generate new tokens", err)
 		return
 	}
-	if user.UserRole != database.UserType(UserRoleManager) {
-		if user.RoleID != agentID {
-			respondWithError(w, http.StatusUnauthorized, "Only managers and owners can update agent account", err)
-			return
-		}
+
+	isManager := user.UserRole == database.UserTypeManager
+
+	if !isManager && user.RoleID != agentID {
+		/*
+			 * caller must be a manager or agent that owns the user profile
+				* For instance, say agent with agentID 002 wants to change his/her
+				* profile they will be able to but agent with agentID 003 cannot
+				* change agent 002's profile. Only managers have permission to
+				* update others account
+		*/
+		respondWithError(w, http.StatusUnauthorized,
+			"Only managers and owners can update agent account", nil)
+		return
 	}
 
 	agent, err := cfg.db.GetAgentByID(r.Context(), agentID)
@@ -82,7 +91,7 @@ func (cfg *apiConfig) handlerUpdateAgents(w http.ResponseWriter, r *http.Request
 		dept = params.Dept
 	}
 
-	err = cfg.db.UpdateAgent(r.Context(), database.UpdateAgentParams{
+	dbAgent, err := cfg.db.UpdateAgent(r.Context(), database.UpdateAgentParams{
 		ID:        agentID,
 		FirstName: fName,
 		LastName:  lName,
@@ -97,12 +106,12 @@ func (cfg *apiConfig) handlerUpdateAgents(w http.ResponseWriter, r *http.Request
 	respondWithJson(w, http.StatusOK, Response{
 		Agent: Agent{
 			ID:        agent.ID,
-			FirstName: agent.FirstName,
-			LastName:  agent.LastName,
-			CreatedAt: agent.CreatedAt,
-			UpdatedAt: agent.UpdatedAt,
-			Email:     agent.Email,
-			Dept:      agent.Dept,
+			FirstName: dbAgent.FirstName,
+			LastName:  dbAgent.LastName,
+			CreatedAt: dbAgent.CreatedAt,
+			UpdatedAt: dbAgent.UpdatedAt,
+			Email:     dbAgent.Email,
+			Dept:      dbAgent.Dept,
 		},
 	})
 }

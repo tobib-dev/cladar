@@ -99,7 +99,7 @@ func (q *Queries) GetAllAgents(ctx context.Context) ([]Agent, error) {
 	return items, nil
 }
 
-const updateAgent = `-- name: UpdateAgent :exec
+const updateAgent = `-- name: UpdateAgent :one
 UPDATE agents
 SET first_name = $2,
     last_name = $3,
@@ -107,6 +107,7 @@ SET first_name = $2,
     email = $4,
     dept = $5
 WHERE id = $1
+RETURNING id, first_name, last_name, created_at, updated_at, email, dept
 `
 
 type UpdateAgentParams struct {
@@ -117,13 +118,23 @@ type UpdateAgentParams struct {
 	Dept      string
 }
 
-func (q *Queries) UpdateAgent(ctx context.Context, arg UpdateAgentParams) error {
-	_, err := q.db.ExecContext(ctx, updateAgent,
+func (q *Queries) UpdateAgent(ctx context.Context, arg UpdateAgentParams) (Agent, error) {
+	row := q.db.QueryRowContext(ctx, updateAgent,
 		arg.ID,
 		arg.FirstName,
 		arg.LastName,
 		arg.Email,
 		arg.Dept,
 	)
-	return err
+	var i Agent
+	err := row.Scan(
+		&i.ID,
+		&i.FirstName,
+		&i.LastName,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.Email,
+		&i.Dept,
+	)
+	return i, err
 }

@@ -10,11 +10,12 @@ SELECT * FROM agents;
 SELECT * FROM agents
 WHERE id = $1;
 
--- name: UpdateAgent :exec
+-- name: UpdateAgent :one
 UPDATE agents
 SET first_name = $2,
     last_name = $3,
     updated_at = NOW(),
     email = $4,
     dept = $5
-WHERE id = $1;
+WHERE id = $1
+RETURNING *;
