@@ -47,6 +47,10 @@ func (cfg *apiConfig) handlerCreateAgent(w http.ResponseWriter, r *http.Request)
 		respondWithError(w, http.StatusUnauthorized, "Only managers have permission to create agents", err)
 		return
 	}
+	if user.ExpiresAt.Before(time.Now()) || user.RevokedAt.Valid {
+		respondWithError(w, http.StatusUnauthorized, "Token is expired or revoked, please generate new tokens", err)
+		return
+	}
 
 	params := Parameters{}
 	decoder := json.NewDecoder(r.Body)
