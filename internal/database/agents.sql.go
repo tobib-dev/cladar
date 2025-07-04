@@ -44,6 +44,16 @@ func (q *Queries) CreateAgent(ctx context.Context, arg CreateAgentParams) (Agent
 	return i, err
 }
 
+const deleteAgent = `-- name: DeleteAgent :exec
+DELETE FROM agents
+WHERE id = $1
+`
+
+func (q *Queries) DeleteAgent(ctx context.Context, id uuid.UUID) error {
+	_, err := q.db.ExecContext(ctx, deleteAgent, id)
+	return err
+}
+
 const getAgentByID = `-- name: GetAgentByID :one
 SELECT id, first_name, last_name, created_at, updated_at, email, dept FROM agents
 WHERE id = $1

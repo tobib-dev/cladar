@@ -63,7 +63,7 @@ func (cfg *apiConfig) handlerUpdateAgents(w http.ResponseWriter, r *http.Request
 				* change agent 002's profile. Only managers have permission to
 				* update others account
 		*/
-		respondWithError(w, http.StatusUnauthorized,
+		respondWithError(w, http.StatusForbidden,
 			"Only managers and owners can update agent account", nil)
 		return
 	}

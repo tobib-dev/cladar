@@ -19,3 +19,7 @@ SET first_name = $2,
     dept = $5
 WHERE id = $1
 RETURNING *;
+
+-- name: DeleteAgent :exec
+DELETE FROM agents
+WHERE id = $1;
