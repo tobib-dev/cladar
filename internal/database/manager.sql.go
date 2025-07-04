@@ -14,7 +14,7 @@ import (
 const createManager = `-- name: CreateManager :one
 INSERT INTO managers (id, first_name, last_name, email, dept_id)
 VALUES (gen_random_uuid(), $1, $2, $3, $4)
-RETURNING id, first_name, last_name, email, dept_id
+RETURNING id, first_name, last_name, email, dept_id, created_at, updated_at
 `
 
 type CreateManagerParams struct {
@@ -38,12 +38,14 @@ func (q *Queries) CreateManager(ctx context.Context, arg CreateManagerParams) (M
 		&i.LastName,
 		&i.Email,
 		&i.DeptID,
+		&i.CreatedAt,
+		&i.UpdatedAt,
 	)
 	return i, err
 }
 
 const getAllManagers = `-- name: GetAllManagers :many
-SELECT id, first_name, last_name, email, dept_id FROM managers
+SELECT id, first_name, last_name, email, dept_id, created_at, updated_at FROM managers
 `
 
 func (q *Queries) GetAllManagers(ctx context.Context) ([]Manager, error) {
@@ -61,6 +63,8 @@ func (q *Queries) GetAllManagers(ctx context.Context) ([]Manager, error) {
 			&i.LastName,
 			&i.Email,
 			&i.DeptID,
+			&i.CreatedAt,
+			&i.UpdatedAt,
 		); err != nil {
 			return nil, err
 		}
