@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/tobib-dev/cladar/internal/auth"
 	"github.com/tobib-dev/cladar/internal/database"
 )
 
@@ -50,6 +51,22 @@ func (cfg *apiConfig) handlerCreateClaim(w http.ResponseWriter, r *http.Request)
 	agentID, err := uuid.Parse(params.AgentIDString)
 	if err != nil {
 		respondWithError(w, http.StatusBadRequest, "Couldn't get agentID as uuid", err)
+		return
+	}
+
+	bearerToken, err := auth.GetBearerToken(r.Header)
+	if err != nil {
+		respondWithError(w, http.StatusBadRequest, "Couldn't retrieve bearer token", err)
+		return
+	}
+
+	user, err := cfg.db.GetUserFromToken(r.Context(), bearerToken)
+	if err != nil {
+		respondWithError(w, http.StatusUnauthorized, "Invalid token", err)
+		return
+	}
+	if user.UserRole != database.UserType(UserRoleManager) {
+		respondWithError(w, http.StatusUnauthorized, "Only managers can create claims", err)
 		return
 	}
 
