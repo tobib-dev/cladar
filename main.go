@@ -72,6 +72,8 @@ func main() {
 	mux.HandleFunc("PUT /api/agents/{agentID}", cfg.handlerUpdateAgents)
 	mux.HandleFunc("DELETE /api/agents/{agentID}", cfg.handlerDeleteAgent)
 
+	mux.HandleFunc("POST /api/claims/{custID}", cfg.handlerCreateClaim)
+
 	mux.HandleFunc("POST /api/departments", cfg.handlerCreateDept)
 	mux.HandleFunc("GET /api/departments", cfg.handlerGetAllDepts)
 

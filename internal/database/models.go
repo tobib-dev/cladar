@@ -19,6 +19,7 @@ const (
 	StatusDeclined  Status = "declined"
 	StatusAwarded   Status = "awarded"
 	StatusCompleted Status = "completed"
+	StatusPending   Status = "pending"
 )
 
 func (e *Status) Scan(src interface{}) error {
