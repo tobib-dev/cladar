@@ -132,8 +132,10 @@ type Customer struct {
 }
 
 type Department struct {
-	ID       uuid.UUID
-	DeptName string
+	ID        uuid.UUID
+	DeptName  string
+	CreatedAt time.Time
+	UpdatedAt time.Time
 }
 
 type Manager struct {
@@ -156,9 +158,11 @@ type RefreshToken struct {
 }
 
 type User struct {
-	ID       uuid.UUID
-	Email    string
-	Pswd     string
-	UserRole UserType
-	RoleID   uuid.UUID
+	ID        uuid.UUID
+	Email     string
+	Pswd      string
+	UserRole  UserType
+	RoleID    uuid.UUID
+	CreatedAt time.Time
+	UpdatedAt time.Time
 }

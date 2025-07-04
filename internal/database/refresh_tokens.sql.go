@@ -33,23 +33,25 @@ func (q *Queries) GetRefreshToken(ctx context.Context, token string) (RefreshTok
 }
 
 const getUserFromToken = `-- name: GetUserFromToken :one
-SELECT token, created_at, updated_at, user_id, expires_at, revoked_at, id, email, pswd, user_role, role_id FROM refresh_tokens
+SELECT token, refresh_tokens.created_at, refresh_tokens.updated_at, user_id, expires_at, revoked_at, id, email, pswd, user_role, role_id, users.created_at, users.updated_at FROM refresh_tokens
 JOIN users ON users.id = refresh_tokens.user_id
 WHERE refresh_tokens.token = $1
 `
 
 type GetUserFromTokenRow struct {
-	Token     string
-	CreatedAt time.Time
-	UpdatedAt time.Time
-	UserID    uuid.UUID
-	ExpiresAt time.Time
-	RevokedAt sql.NullTime
-	ID        uuid.UUID
-	Email     string
-	Pswd      string
-	UserRole  UserType
-	RoleID    uuid.UUID
+	Token       string
+	CreatedAt   time.Time
+	UpdatedAt   time.Time
+	UserID      uuid.UUID
+	ExpiresAt   time.Time
+	RevokedAt   sql.NullTime
+	ID          uuid.UUID
+	Email       string
+	Pswd        string
+	UserRole    UserType
+	RoleID      uuid.UUID
+	CreatedAt_2 time.Time
+	UpdatedAt_2 time.Time
 }
 
 func (q *Queries) GetUserFromToken(ctx context.Context, token string) (GetUserFromTokenRow, error) {
@@ -67,6 +69,8 @@ func (q *Queries) GetUserFromToken(ctx context.Context, token string) (GetUserFr
 		&i.Pswd,
 		&i.UserRole,
 		&i.RoleID,
+		&i.CreatedAt_2,
+		&i.UpdatedAt_2,
 	)
 	return i, err
 }

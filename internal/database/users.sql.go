@@ -12,9 +12,9 @@ import (
 )
 
 const createUser = `-- name: CreateUser :one
-INSERT INTO users (id, email, pswd, user_role, role_id)
-VALUES (gen_random_uuid(), $1, $2, $3, $4)
-RETURNING id, email, pswd, user_role, role_id
+INSERT INTO users (id, email, pswd, user_role, role_id, created_at, updated_at)
+VALUES (gen_random_uuid(), $1, $2, $3, $4, NOW(), NOW())
+RETURNING id, email, pswd, user_role, role_id, created_at, updated_at
 `
 
 type CreateUserParams struct {
@@ -38,12 +38,14 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, e
 		&i.Pswd,
 		&i.UserRole,
 		&i.RoleID,
+		&i.CreatedAt,
+		&i.UpdatedAt,
 	)
 	return i, err
 }
 
 const getUserByEmail = `-- name: GetUserByEmail :one
-SELECT id, email, pswd, user_role, role_id FROM users
+SELECT id, email, pswd, user_role, role_id, created_at, updated_at FROM users
 WHERE email = $1
 `
 
@@ -56,12 +58,14 @@ func (q *Queries) GetUserByEmail(ctx context.Context, email string) (User, error
 		&i.Pswd,
 		&i.UserRole,
 		&i.RoleID,
+		&i.CreatedAt,
+		&i.UpdatedAt,
 	)
 	return i, err
 }
 
 const getUserById = `-- name: GetUserById :one
-SELECT id, email, pswd, user_role, role_id FROM users
+SELECT id, email, pswd, user_role, role_id, created_at, updated_at FROM users
 WHERE id = $1
 `
 
@@ -74,6 +78,8 @@ func (q *Queries) GetUserById(ctx context.Context, id uuid.UUID) (User, error) {
 		&i.Pswd,
 		&i.UserRole,
 		&i.RoleID,
+		&i.CreatedAt,
+		&i.UpdatedAt,
 	)
 	return i, err
 }
