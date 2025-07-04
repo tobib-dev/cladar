@@ -69,6 +69,7 @@ func main() {
 	mux.HandleFunc("POST /api/agents", cfg.handlerCreateAgent)
 	mux.HandleFunc("GET /api/agents", cfg.handlerGetAllAgents)
 	mux.HandleFunc("GET /api/agents/{agentID}", cfg.handlerGetAgent)
+	mux.HandleFunc("PUT /api/agents/{agentID}", cfg.handlerUpdateAgents)
 
 	mux.HandleFunc("POST /api/departments", cfg.handlerCreateDept)
 	mux.HandleFunc("GET /api/departments", cfg.handlerGetAllDepts)
