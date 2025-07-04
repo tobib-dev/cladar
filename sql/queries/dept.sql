@@ -1,6 +1,6 @@
 -- name: CreateDept :one
-INSERT INTO departments (id, dept_name)
-VALUES (gen_random_uuid(), $1)
+INSERT INTO departments (id, dept_name, created_at, updated_at)
+VALUES (gen_random_uuid(), $1, NOW(), NOW())
 RETURNING *;
 
 
