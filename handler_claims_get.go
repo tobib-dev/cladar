@@ -7,6 +7,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/tobib-dev/cladar/internal/auth"
+	"github.com/tobib-dev/cladar/internal/database"
 )
 
 func (cfg *apiConfig) handlerGetAllClaims(w http.ResponseWriter, r *http.Request) {
@@ -34,26 +35,7 @@ func (cfg *apiConfig) handlerGetAllClaims(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	allClaims := make([]Claims, len(claims))
-	for i, claim := range claims {
-		var awardString string
-		if claim.Award.Valid {
-			awardString = fmt.Sprintf("%.2f", claim.Award.Float64)
-		} else {
-			awardString = ""
-		}
-
-		allClaims[i] = Claims{
-			ID:              claim.ID,
-			CustomerID:      claim.CustomerID,
-			AssignedAgentID: claim.AgentID,
-			ClaimType:       claim.ClaimType,
-			CreatedAt:       claim.CreatedAt,
-			UpdatedAt:       claim.UpdatedAt,
-			CurrentStatus:   string(claim.CurrentStatus),
-			AwardAmount:     awardString,
-		}
-	}
+	allClaims := GetClaimsArray(claims)
 
 	respondWithJson(w, http.StatusOK, allClaims)
 }
@@ -143,23 +125,7 @@ func (cfg *apiConfig) handlerGetClaimsByCustomer(w http.ResponseWriter, r *http.
 		return
 	}
 
-	allCustClaims := make([]Claims, len(claims))
-	for i, claim := range claims {
-		awardString := ""
-		if claim.Award.Valid {
-			awardString = fmt.Sprintf("%.2f", claim.Award.Float64)
-		}
-		allCustClaims[i] = Claims{
-			ID:              claim.ID,
-			CustomerID:      claim.CustomerID,
-			AssignedAgentID: claim.AgentID,
-			ClaimType:       claim.ClaimType,
-			CreatedAt:       claim.CreatedAt,
-			UpdatedAt:       claim.UpdatedAt,
-			CurrentStatus:   string(claim.CurrentStatus),
-			AwardAmount:     awardString,
-		}
-	}
+	allCustClaims := GetClaimsArray(claims)
 
 	respondWithJson(w, http.StatusOK, allCustClaims)
 }
@@ -198,14 +164,21 @@ func (cfg *apiConfig) handlerGetClaimsByAssignedAgent(w http.ResponseWriter, r *
 		return
 	}
 
-	agentClaims := make([]Claims, len(claims))
-	for i, claim := range claims {
+	agentClaims := GetClaimsArray(claims)
+
+	respondWithJson(w, http.StatusOK, agentClaims)
+}
+
+func GetClaimsArray(dbClaims []database.Claim) []Claims {
+	claims := make([]Claims, len(dbClaims))
+
+	for i, claim := range dbClaims {
 		awardString := ""
 		if claim.Award.Valid {
 			awardString = fmt.Sprintf("%.2f", claim.Award.Float64)
 		}
 
-		agentClaims[i] = Claims{
+		claims[i] = Claims{
 			ID:              claim.ID,
 			CustomerID:      claim.CustomerID,
 			AssignedAgentID: claim.AgentID,
@@ -217,5 +190,5 @@ func (cfg *apiConfig) handlerGetClaimsByAssignedAgent(w http.ResponseWriter, r *
 		}
 	}
 
-	respondWithJson(w, http.StatusOK, agentClaims)
+	return claims
 }
