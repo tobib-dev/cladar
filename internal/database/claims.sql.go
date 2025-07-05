@@ -81,3 +81,24 @@ func (q *Queries) GetAllClaims(ctx context.Context) ([]Claim, error) {
 	}
 	return items, nil
 }
+
+const getClaimByID = `-- name: GetClaimByID :one
+SELECT id, customer_id, agent_id, claim_type, created_at, updated_at, current_status, award FROM claims
+WHERE id = $1
+`
+
+func (q *Queries) GetClaimByID(ctx context.Context, id uuid.UUID) (Claim, error) {
+	row := q.db.QueryRowContext(ctx, getClaimByID, id)
+	var i Claim
+	err := row.Scan(
+		&i.ID,
+		&i.CustomerID,
+		&i.AgentID,
+		&i.ClaimType,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.CurrentStatus,
+		&i.Award,
+	)
+	return i, err
+}

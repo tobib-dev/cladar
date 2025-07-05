@@ -5,3 +5,7 @@ RETURNING *;
 
 -- name: GetAllClaims :many
 SELECT * FROM claims;
+
+-- name: GetClaimByID :one
+SELECT * FROM claims
+WHERE id = $1;
