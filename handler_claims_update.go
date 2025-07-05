@@ -53,7 +53,12 @@ func (cfg *apiConfig) handlerChangeAssignedAgent(w http.ResponseWriter, r *http.
 	}
 	if user.ExpiresAt.Before(time.Now()) || user.RevokedAt.Valid {
 		respondWithError(w, http.StatusUnauthorized,
-			"Token expired or revoked; Please generate new token", err)
+			"Token expired or revoked; Please generate new token", nil)
+		return
+	}
+	if user.UserRole != database.UserType(UserRoleManager) {
+		respondWithError(w, http.StatusForbidden,
+			"Only managers have permission to reassign agents", nil)
 		return
 	}
 

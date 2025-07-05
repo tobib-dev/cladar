@@ -66,7 +66,7 @@ func (cfg *apiConfig) handlerCreateClaim(w http.ResponseWriter, r *http.Request)
 		return
 	}
 	if user.UserRole != database.UserType(UserRoleManager) {
-		respondWithError(w, http.StatusUnauthorized, "Only managers can create claims", err)
+		respondWithError(w, http.StatusUnauthorized, "Only managers can create claims", nil)
 		return
 	}
 

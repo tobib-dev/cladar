@@ -25,7 +25,7 @@ func (cfg *apiConfig) handlerGetAllClaims(w http.ResponseWriter, r *http.Request
 
 	if user.RevokedAt.Valid || user.ExpiresAt.Before(time.Now()) {
 		respondWithError(w, http.StatusUnauthorized,
-			"Token expired or revoked; Please generate new token", err)
+			"Token expired or revoked; Please generate new token", nil)
 		return
 	}
 
@@ -65,7 +65,7 @@ func (cfg *apiConfig) handlerGetClaim(w http.ResponseWriter, r *http.Request) {
 	}
 	if user.ExpiresAt.Before(time.Now()) || user.RevokedAt.Valid {
 		respondWithError(w, http.StatusUnauthorized,
-			"Token revoked or expired; Please generate new token", err)
+			"Token revoked or expired; Please generate new token", nil)
 		return
 	}
 
@@ -115,7 +115,7 @@ func (cfg *apiConfig) handlerGetClaimsByCustomer(w http.ResponseWriter, r *http.
 	}
 	if user.ExpiresAt.Before(time.Now()) || user.RevokedAt.Valid {
 		respondWithError(w, http.StatusUnauthorized,
-			"Token expired or revoked; Please genereate new token", err)
+			"Token expired or revoked; Please genereate new token", nil)
 		return
 	}
 
@@ -153,7 +153,7 @@ func (cfg *apiConfig) handlerGetClaimsByAssignedAgent(w http.ResponseWriter, r *
 	}
 	if user.ExpiresAt.Before(time.Now()) || user.RevokedAt.Valid {
 		respondWithError(w, http.StatusUnauthorized,
-			"Token expired or revoked; Please generate new token", err)
+			"Token expired or revoked; Please generate new token", nil)
 		return
 	}
 
