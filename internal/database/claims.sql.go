@@ -12,6 +12,35 @@ import (
 	"github.com/google/uuid"
 )
 
+const changeAssignedAgent = `-- name: ChangeAssignedAgent :one
+UPDATE claims
+SET agent_id = $2,
+    updated_at = NOW()
+WHERE id = $1
+RETURNING id, customer_id, agent_id, claim_type, created_at, updated_at, current_status, award
+`
+
+type ChangeAssignedAgentParams struct {
+	ID      uuid.UUID
+	AgentID uuid.UUID
+}
+
+func (q *Queries) ChangeAssignedAgent(ctx context.Context, arg ChangeAssignedAgentParams) (Claim, error) {
+	row := q.db.QueryRowContext(ctx, changeAssignedAgent, arg.ID, arg.AgentID)
+	var i Claim
+	err := row.Scan(
+		&i.ID,
+		&i.CustomerID,
+		&i.AgentID,
+		&i.ClaimType,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.CurrentStatus,
+		&i.Award,
+	)
+	return i, err
+}
+
 const createClaim = `-- name: CreateClaim :one
 INSERT INTO claims (id, customer_id, agent_id, claim_type, created_at, updated_at, current_status, award)
 VALUES (gen_random_uuid(), $1, $2, $3, NOW(), NOW(), 'pending', $4)

@@ -17,3 +17,10 @@ WHERE customer_id = $1;
 -- name: GetAllClaimsByAgent :many
 SELECT * FROM claims
 WHERE agent_id = $1;
+
+-- name: ChangeAssignedAgent :one
+UPDATE claims
+SET agent_id = $2,
+    updated_at = NOW()
+WHERE id = $1
+RETURNING *;
