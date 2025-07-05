@@ -82,6 +82,43 @@ func (q *Queries) GetAllClaims(ctx context.Context) ([]Claim, error) {
 	return items, nil
 }
 
+const getAllClaimsByCust = `-- name: GetAllClaimsByCust :many
+SELECT id, customer_id, agent_id, claim_type, created_at, updated_at, current_status, award FROM claims
+WHERE customer_id = $1
+`
+
+func (q *Queries) GetAllClaimsByCust(ctx context.Context, customerID uuid.UUID) ([]Claim, error) {
+	rows, err := q.db.QueryContext(ctx, getAllClaimsByCust, customerID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Claim
+	for rows.Next() {
+		var i Claim
+		if err := rows.Scan(
+			&i.ID,
+			&i.CustomerID,
+			&i.AgentID,
+			&i.ClaimType,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.CurrentStatus,
+			&i.Award,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getClaimByID = `-- name: GetClaimByID :one
 SELECT id, customer_id, agent_id, claim_type, created_at, updated_at, current_status, award FROM claims
 WHERE id = $1

@@ -9,3 +9,7 @@ SELECT * FROM claims;
 -- name: GetClaimByID :one
 SELECT * FROM claims
 WHERE id = $1;
+
+-- name: GetAllClaimsByCust :many
+SELECT * FROM claims
+WHERE customer_id = $1;
