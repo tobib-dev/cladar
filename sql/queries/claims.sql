@@ -13,3 +13,7 @@ WHERE id = $1;
 -- name: GetAllClaimsByCust :many
 SELECT * FROM claims
 WHERE customer_id = $1;
+
+-- name: GetAllClaimsByAgent :many
+SELECT * FROM claims
+WHERE agent_id = $1;

@@ -163,3 +163,59 @@ func (cfg *apiConfig) handlerGetClaimsByCustomer(w http.ResponseWriter, r *http.
 
 	respondWithJson(w, http.StatusOK, allCustClaims)
 }
+
+func (cfg *apiConfig) handlerGetClaimsByAssignedAgent(w http.ResponseWriter, r *http.Request) {
+	agentIDString := r.PathValue("agentID")
+	agentID, err := uuid.Parse(agentIDString)
+	if err != nil {
+		respondWithError(w, http.StatusBadRequest,
+			"Malformed header; Couldn't parse agentID", err)
+		return
+	}
+
+	bearerToken, err := auth.GetBearerToken(r.Header)
+	if err != nil {
+		respondWithError(w, http.StatusBadRequest,
+			"Malformed header; Couldn't retrieve token", err)
+		return
+	}
+
+	user, err := cfg.db.GetUserFromToken(r.Context(), bearerToken)
+	if err != nil {
+		respondWithError(w, http.StatusUnauthorized, "Invalid token", err)
+		return
+	}
+	if user.ExpiresAt.Before(time.Now()) || user.RevokedAt.Valid {
+		respondWithError(w, http.StatusUnauthorized,
+			"Token expired or revoked; Please generate new token", err)
+		return
+	}
+
+	claims, err := cfg.db.GetAllClaimsByAgent(r.Context(), agentID)
+	if err != nil {
+		respondWithError(w, http.StatusNotFound,
+			"Couldn't retrieve claims assigned to agent", err)
+		return
+	}
+
+	agentClaims := make([]Claims, len(claims))
+	for i, claim := range claims {
+		awardString := ""
+		if claim.Award.Valid {
+			awardString = fmt.Sprintf("%.2f", claim.Award.Float64)
+		}
+
+		agentClaims[i] = Claims{
+			ID:              claim.ID,
+			CustomerID:      claim.CustomerID,
+			AssignedAgentID: claim.AgentID,
+			ClaimType:       claim.ClaimType,
+			CreatedAt:       claim.CreatedAt,
+			UpdatedAt:       claim.UpdatedAt,
+			CurrentStatus:   string(claim.CurrentStatus),
+			AwardAmount:     awardString,
+		}
+	}
+
+	respondWithJson(w, http.StatusOK, agentClaims)
+}
