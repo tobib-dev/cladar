@@ -38,3 +38,11 @@ SET current_status = 'declined',
     updated_at = NOW()
 WHERE id = $1
 RETURNING *;
+
+-- name: ApproveClaim :one
+UPDATE claims
+SET current_status = 'awarded',
+    updated_at = NOW(),
+    award = $2
+WHERE id = $1
+RETURNING *;

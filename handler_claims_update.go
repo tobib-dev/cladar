@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/google/uuid"
@@ -236,10 +237,108 @@ func (cfg *apiConfig) handlerDeclineClaim(w http.ResponseWriter, r *http.Request
 	})
 }
 
+func (cfg *apiConfig) handlerAwardClaim(w http.ResponseWriter, r *http.Request) {
+	type Parameters struct {
+		AwardAmount string `json:"award_amount"`
+	}
+
+	type Response struct {
+		Claims
+	}
+
+	claimIDString := r.PathValue("claimID")
+	claimID, err := uuid.Parse(claimIDString)
+	if err != nil {
+		respondWithError(w, http.StatusBadRequest, "Couldn't parse claimID", err)
+		return
+	}
+
+	params := Parameters{}
+	decoder := json.NewDecoder(r.Body)
+	err = decoder.Decode(&params)
+	if err != nil {
+		respondWithError(w, http.StatusBadRequest, "Couldn't decode parameters", err)
+		return
+	}
+
+	bearerToken, err := auth.GetBearerToken(r.Header)
+	if err != nil {
+		respondWithError(w, http.StatusBadRequest,
+			"Malformed header; Couldn't retrieve token", err)
+		return
+	}
+
+	user, err := cfg.db.GetUserFromToken(r.Context(), bearerToken)
+	if err != nil {
+		respondWithError(w, http.StatusUnauthorized, "Invalid token", err)
+		return
+	}
+	if user.ExpiresAt.Before(time.Now()) || user.RevokedAt.Valid {
+		respondWithError(w, http.StatusUnauthorized,
+			"Token expired or revoked; Please generate new token", nil)
+		return
+	}
+
+	currentClaim, err := cfg.db.GetClaimByID(r.Context(), claimID)
+	if err != nil {
+		respondWithError(w, http.StatusNotFound, "Couldn't retrieve claim", err)
+		return
+	}
+	if currentClaim.CurrentStatus == database.Status(StatusAwarded) {
+		respondWithError(w, http.StatusMethodNotAllowed,
+			"Cannot change claim from status awarded to awarded", nil)
+		return
+	}
+
+	awardSqlFlt, err := GetAwardFloat(params.AwardAmount)
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError,
+			"Couldn't parse award amount to Float64", err)
+		return
+	}
+	updatedClaim, err := cfg.db.ApproveClaim(r.Context(), database.ApproveClaimParams{
+		ID:    claimID,
+		Award: awardSqlFlt,
+	})
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError,
+			"Couldn't update status to awarded", err)
+		return
+	}
+
+	awardString := GetAwardString(updatedClaim.Award)
+	respondWithJson(w, http.StatusOK, Response{
+		Claims: Claims{
+			ID:              updatedClaim.ID,
+			CustomerID:      updatedClaim.CustomerID,
+			AssignedAgentID: updatedClaim.AgentID,
+			ClaimType:       updatedClaim.ClaimType,
+			CreatedAt:       updatedClaim.CreatedAt,
+			UpdatedAt:       updatedClaim.UpdatedAt,
+			CurrentStatus:   string(updatedClaim.CurrentStatus),
+			AwardAmount:     awardString,
+		},
+	})
+}
+
 func GetAwardString(awardFloat sql.NullFloat64) string {
 	awardString := ""
 	if awardFloat.Valid {
 		awardString = fmt.Sprintf("%.2f", awardFloat.Float64)
 	}
 	return awardString
+}
+
+func GetAwardFloat(awardString string) (sql.NullFloat64, error) {
+	awardFlt, err := strconv.ParseFloat(awardString, 64)
+	if err != nil {
+		return sql.NullFloat64{
+			Float64: 0,
+			Valid:   false,
+		}, err
+	}
+	return sql.NullFloat64{
+		Float64: awardFlt,
+		Valid:   true,
+	}, nil
 }

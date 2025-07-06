@@ -12,6 +12,36 @@ import (
 	"github.com/google/uuid"
 )
 
+const approveClaim = `-- name: ApproveClaim :one
+UPDATE claims
+SET current_status = 'awarded',
+    updated_at = NOW(),
+    award = $2
+WHERE id = $1
+RETURNING id, customer_id, agent_id, claim_type, created_at, updated_at, current_status, award
+`
+
+type ApproveClaimParams struct {
+	ID    uuid.UUID
+	Award sql.NullFloat64
+}
+
+func (q *Queries) ApproveClaim(ctx context.Context, arg ApproveClaimParams) (Claim, error) {
+	row := q.db.QueryRowContext(ctx, approveClaim, arg.ID, arg.Award)
+	var i Claim
+	err := row.Scan(
+		&i.ID,
+		&i.CustomerID,
+		&i.AgentID,
+		&i.ClaimType,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.CurrentStatus,
+		&i.Award,
+	)
+	return i, err
+}
+
 const changeAssignedAgent = `-- name: ChangeAssignedAgent :one
 UPDATE claims
 SET agent_id = $2,
