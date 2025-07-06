@@ -3,7 +3,6 @@ package main
 import (
 	"database/sql"
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"time"
 
@@ -94,12 +93,7 @@ func (cfg *apiConfig) handlerCreateClaim(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	var awardString string
-	if claim.Award.Valid {
-		awardString = fmt.Sprintf("%.2f", claim.Award.Float64)
-	} else {
-		awardString = ""
-	}
+	awardString := GetAwardString(claim.Award)
 	respondWithJson(w, http.StatusCreated, Response{
 		Claims: Claims{
 			ID:              claim.ID,

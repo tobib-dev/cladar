@@ -79,10 +79,7 @@ func (cfg *apiConfig) handlerChangeAssignedAgent(w http.ResponseWriter, r *http.
 		AgentID: agentID,
 	})
 
-	awardString := ""
-	if updatedClaim.Award.Valid {
-		awardString = fmt.Sprintf("%.2f", updatedClaim.Award.Float64)
-	}
+	awardString := GetAwardString(updatedClaim.Award)
 
 	respondWithJson(w, http.StatusOK, Response{
 		Claims: Claims{
@@ -160,10 +157,7 @@ func (cfg *apiConfig) handlerChangeClaimType(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	awardString := ""
-	if updatedClaim.Award.Valid {
-		awardString = fmt.Sprintf("%.2f", updatedClaim.Award.Float64)
-	}
+	awardString := GetAwardString(updatedClaim.Award)
 
 	respondWithJson(w, http.StatusOK, Response{
 		Claims: Claims{

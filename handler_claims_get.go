@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"net/http"
 	"time"
 
@@ -75,10 +74,7 @@ func (cfg *apiConfig) handlerGetClaim(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	awardString := ""
-	if claim.Award.Valid {
-		awardString = fmt.Sprintf("%.2f", claim.Award.Float64)
-	}
+	awardString := GetAwardString(claim.Award)
 
 	respondWithJson(w, http.StatusOK, Response{
 		Claims: Claims{
@@ -173,10 +169,7 @@ func GetClaimsArray(dbClaims []database.Claim) []Claims {
 	claims := make([]Claims, len(dbClaims))
 
 	for i, claim := range dbClaims {
-		awardString := ""
-		if claim.Award.Valid {
-			awardString = fmt.Sprintf("%.2f", claim.Award.Float64)
-		}
+		awardString := GetAwardString(claim.Award)
 
 		claims[i] = Claims{
 			ID:              claim.ID,
