@@ -23,6 +23,15 @@ type Claims struct {
 	AwardAmount     string    `json:"award_amount"`
 }
 
+type CurrentStatus string
+
+const (
+	StatusPending   CurrentStatus = "pending"
+	StatusDeclined  CurrentStatus = "declined"
+	StatusAwarded   CurrentStatus = "awarded"
+	StatusCompleted CurrentStatus = "completed"
+)
+
 func (cfg *apiConfig) handlerCreateClaim(w http.ResponseWriter, r *http.Request) {
 	type Parameters struct {
 		AgentIDString string `json:"agent_id"`

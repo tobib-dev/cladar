@@ -104,6 +104,30 @@ func (q *Queries) CreateClaim(ctx context.Context, arg CreateClaimParams) (Claim
 	return i, err
 }
 
+const declineClaim = `-- name: DeclineClaim :one
+UPDATE claims
+SET current_status = 'declined',
+    updated_at = NOW()
+WHERE id = $1
+RETURNING id, customer_id, agent_id, claim_type, created_at, updated_at, current_status, award
+`
+
+func (q *Queries) DeclineClaim(ctx context.Context, id uuid.UUID) (Claim, error) {
+	row := q.db.QueryRowContext(ctx, declineClaim, id)
+	var i Claim
+	err := row.Scan(
+		&i.ID,
+		&i.CustomerID,
+		&i.AgentID,
+		&i.ClaimType,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.CurrentStatus,
+		&i.Award,
+	)
+	return i, err
+}
+
 const getAllClaims = `-- name: GetAllClaims :many
 SELECT id, customer_id, agent_id, claim_type, created_at, updated_at, current_status, award FROM claims
 `

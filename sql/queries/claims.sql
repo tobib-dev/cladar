@@ -31,3 +31,10 @@ SET claim_type = $2,
     updated_at = NOW()
 WHERE id = $1
 RETURNING *;
+
+-- name: DeclineClaim :one
+UPDATE claims
+SET current_status = 'declined',
+    updated_at = NOW()
+WHERE id = $1
+RETURNING *;
