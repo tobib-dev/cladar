@@ -3,7 +3,6 @@ package main
 import (
 	"database/sql"
 	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
 	"strconv"
@@ -12,6 +11,8 @@ import (
 	"github.com/google/uuid"
 	"github.com/tobib-dev/cladar/internal/auth"
 	"github.com/tobib-dev/cladar/internal/database"
+	"golang.org/x/text/language"
+	"golang.org/x/text/message"
 )
 
 func (cfg *apiConfig) handlerChangeAssignedAgent(w http.ResponseWriter, r *http.Request) {
@@ -322,11 +323,11 @@ func (cfg *apiConfig) handlerAwardClaim(w http.ResponseWriter, r *http.Request) 
 }
 
 func GetAwardString(awardFloat sql.NullFloat64) string {
-	awardString := ""
-	if awardFloat.Valid {
-		awardString = fmt.Sprintf("%.2f", awardFloat.Float64)
+	if !awardFloat.Valid {
+		return ""
 	}
-	return awardString
+	msg := message.NewPrinter(language.English)
+	return msg.Sprintf("$%.2f", awardFloat.Float64)
 }
 
 func GetAwardFloat(awardString string) (sql.NullFloat64, error) {
