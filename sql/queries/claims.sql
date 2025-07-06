@@ -24,3 +24,10 @@ SET agent_id = $2,
     updated_at = NOW()
 WHERE id = $1
 RETURNING *;
+
+-- name: ChangeClaimType :one
+UPDATE claims
+SET claim_type = $2,
+    updated_at = NOW()
+WHERE id = $1
+RETURNING *;

@@ -41,6 +41,35 @@ func (q *Queries) ChangeAssignedAgent(ctx context.Context, arg ChangeAssignedAge
 	return i, err
 }
 
+const changeClaimType = `-- name: ChangeClaimType :one
+UPDATE claims
+SET claim_type = $2,
+    updated_at = NOW()
+WHERE id = $1
+RETURNING id, customer_id, agent_id, claim_type, created_at, updated_at, current_status, award
+`
+
+type ChangeClaimTypeParams struct {
+	ID        uuid.UUID
+	ClaimType string
+}
+
+func (q *Queries) ChangeClaimType(ctx context.Context, arg ChangeClaimTypeParams) (Claim, error) {
+	row := q.db.QueryRowContext(ctx, changeClaimType, arg.ID, arg.ClaimType)
+	var i Claim
+	err := row.Scan(
+		&i.ID,
+		&i.CustomerID,
+		&i.AgentID,
+		&i.ClaimType,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.CurrentStatus,
+		&i.Award,
+	)
+	return i, err
+}
+
 const createClaim = `-- name: CreateClaim :one
 INSERT INTO claims (id, customer_id, agent_id, claim_type, created_at, updated_at, current_status, award)
 VALUES (gen_random_uuid(), $1, $2, $3, NOW(), NOW(), 'pending', $4)
