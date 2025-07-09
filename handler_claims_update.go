@@ -81,6 +81,10 @@ func (cfg *apiConfig) handlerChangeAssignedAgent(w http.ResponseWriter, r *http.
 		ID:      claimID,
 		AgentID: agentID,
 	})
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, "Couldn't change assigned agent", err)
+		return
+	}
 
 	awardString := GetAwardString(updatedClaim.Award)
 
@@ -361,7 +365,7 @@ func (cfg *apiConfig) handlerChangeAwardAmount(w http.ResponseWriter, r *http.Re
 	}
 	if user.ExpiresAt.Before(time.Now()) || user.RevokedAt.Valid {
 		respondWithError(w, http.StatusUnauthorized,
-			"Token expired or revoked; Please generate new token", err)
+			"Token expired or revoked; Please generate new token", nil)
 		return
 	}
 
@@ -382,7 +386,7 @@ func (cfg *apiConfig) handlerChangeAwardAmount(w http.ResponseWriter, r *http.Re
 		respondWithError(w,
 			http.StatusMethodNotAllowed,
 			fmt.Sprintf("New award amount: %.2f is same as existing amount: %.2f", newAwardAmount.Float64, currentClaim.Award.Float64),
-			err)
+			nil)
 		return
 	}
 
@@ -390,6 +394,10 @@ func (cfg *apiConfig) handlerChangeAwardAmount(w http.ResponseWriter, r *http.Re
 		ID:    claimID,
 		Award: newAwardAmount,
 	})
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, "Couldn't change award amount", err)
+		return
+	}
 
 	newAwardString := GetAwardString(updatedClaim.Award)
 	respondWithJson(w, http.StatusOK, Response{

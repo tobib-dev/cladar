@@ -187,6 +187,16 @@ func (q *Queries) DeclineClaim(ctx context.Context, id uuid.UUID) (Claim, error)
 	return i, err
 }
 
+const deleteClaim = `-- name: DeleteClaim :exec
+DELETE FROM claims
+WHERE id = $1
+`
+
+func (q *Queries) DeleteClaim(ctx context.Context, id uuid.UUID) error {
+	_, err := q.db.ExecContext(ctx, deleteClaim, id)
+	return err
+}
+
 const getAllClaims = `-- name: GetAllClaims :many
 SELECT id, customer_id, agent_id, claim_type, created_at, updated_at, current_status, award FROM claims
 `
