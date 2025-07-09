@@ -2,6 +2,7 @@ package main
 
 import (
 	"database/sql"
+	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -58,6 +59,7 @@ func main() {
 		Handler: mux,
 	}
 
+	printBanner()
 	log.Printf("Serving on port: %s\n", port)
 
 	mux.HandleFunc("POST /api/customers", cfg.handlerCreateCustomer)
@@ -84,6 +86,8 @@ func main() {
 	mux.HandleFunc("PUT /api/award/update/claims/{claimID}", cfg.handlerChangeAwardAmount)
 	mux.HandleFunc("DELETE /api/claims/{claimID}", cfg.handlerDeleteClaim)
 
+	mux.HandleFunc("GET /api/claims/status/", cfg.handlerGetPendingClaims)
+
 	mux.HandleFunc("POST /api/departments", cfg.handlerCreateDept)
 	mux.HandleFunc("GET /api/departments", cfg.handlerGetAllDepts)
 
@@ -96,4 +100,14 @@ func main() {
 
 	//mux.HandleFunc("POST /api/reset", cfg.handlerReset)
 	log.Fatal(srv.ListenAndServe())
+}
+
+func printBanner() {
+	fmt.Print(`
+   ________          __
+  / ____/ /___ _____/ /___ ______
+ / /   / / __  / __  / __  / ___/
+/ /___/ / /_/ / /_/ / /_/ / /
+\____/_/\__,_/\__,_/\__,_/_/
+`)
 }
