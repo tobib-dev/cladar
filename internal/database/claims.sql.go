@@ -71,6 +71,35 @@ func (q *Queries) ChangeAssignedAgent(ctx context.Context, arg ChangeAssignedAge
 	return i, err
 }
 
+const changeAwardAmount = `-- name: ChangeAwardAmount :one
+UPDATE claims
+SET award = $2,
+    updated_at = NOW()
+WHERE id = $1
+RETURNING id, customer_id, agent_id, claim_type, created_at, updated_at, current_status, award
+`
+
+type ChangeAwardAmountParams struct {
+	ID    uuid.UUID
+	Award sql.NullFloat64
+}
+
+func (q *Queries) ChangeAwardAmount(ctx context.Context, arg ChangeAwardAmountParams) (Claim, error) {
+	row := q.db.QueryRowContext(ctx, changeAwardAmount, arg.ID, arg.Award)
+	var i Claim
+	err := row.Scan(
+		&i.ID,
+		&i.CustomerID,
+		&i.AgentID,
+		&i.ClaimType,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.CurrentStatus,
+		&i.Award,
+	)
+	return i, err
+}
+
 const changeClaimType = `-- name: ChangeClaimType :one
 UPDATE claims
 SET claim_type = $2,

@@ -46,3 +46,10 @@ SET current_status = 'awarded',
     award = $2
 WHERE id = $1
 RETURNING *;
+
+-- name: ChangeAwardAmount :one
+UPDATE claims
+SET award = $2,
+    updated_at = NOW()
+WHERE id = $1
+RETURNING *;

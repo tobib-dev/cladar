@@ -322,6 +322,87 @@ func (cfg *apiConfig) handlerAwardClaim(w http.ResponseWriter, r *http.Request) 
 	})
 }
 
+func (cfg *apiConfig) handlerChangeAwardAmount(w http.ResponseWriter, r *http.Request) {
+	type Parameters struct {
+		AwardAmount string `json:"award_amount"`
+	}
+
+	type Response struct {
+		Claims
+	}
+
+	claimIDString := r.PathValue("claimID")
+	claimID, err := uuid.Parse(claimIDString)
+	if err != nil {
+		respondWithError(w, http.StatusBadRequest, "Malformed route; Couldn't parse claimID", err)
+		return
+	}
+
+	params := Parameters{}
+	decoder := json.NewDecoder(r.Body)
+	err = decoder.Decode(&params)
+	if err != nil {
+		respondWithError(w, http.StatusBadRequest, "Couldn't decode parameters", err)
+		return
+	}
+
+	bearerToken, err := auth.GetBearerToken(r.Header)
+	if err != nil {
+		respondWithError(w, http.StatusBadRequest,
+			"Malformed header; Couldn't retrieve bearer token", err)
+		return
+	}
+
+	user, err := cfg.db.GetUserFromToken(r.Context(), bearerToken)
+	if err != nil {
+		respondWithError(w, http.StatusUnauthorized, "Invalid token", err)
+		return
+	}
+	if user.ExpiresAt.Before(time.Now()) || user.RevokedAt.Valid {
+		respondWithError(w, http.StatusUnauthorized,
+			"Token expired or revoked; Please generate new token", err)
+		return
+	}
+
+	currentClaim, err := cfg.db.GetClaimByID(r.Context(), claimID)
+	if err != nil {
+		respondWithError(w, http.StatusNotFound, "Couldn't retrieve claim", err)
+		return
+	}
+
+	newAwardAmount, err := GetAwardFloat(params.AwardAmount)
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError,
+			"Couldn't parse award amount to float64", err)
+		return
+	}
+
+	if newAwardAmount.Float64 == currentClaim.Award.Float64 {
+		respondWithError(w, http.StatusMethodNotAllowed,
+			"New award amount is same as old award amount; award amount must be different", err)
+		return
+	}
+
+	updatedClaim, err := cfg.db.ChangeAwardAmount(r.Context(), database.ChangeAwardAmountParams{
+		ID:    claimID,
+		Award: newAwardAmount,
+	})
+
+	newAwardString := GetAwardString(updatedClaim.Award)
+	respondWithJson(w, http.StatusOK, Response{
+		Claims: Claims{
+			ID:              updatedClaim.ID,
+			CustomerID:      updatedClaim.CustomerID,
+			AssignedAgentID: updatedClaim.AgentID,
+			ClaimType:       updatedClaim.ClaimType,
+			CreatedAt:       updatedClaim.CreatedAt,
+			UpdatedAt:       updatedClaim.UpdatedAt,
+			CurrentStatus:   string(updatedClaim.CurrentStatus),
+			AwardAmount:     newAwardString,
+		},
+	})
+}
+
 func GetAwardString(awardFloat sql.NullFloat64) string {
 	if !awardFloat.Valid {
 		return ""
