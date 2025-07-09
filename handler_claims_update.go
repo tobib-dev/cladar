@@ -3,6 +3,7 @@ package main
 import (
 	"database/sql"
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 	"strconv"
@@ -378,8 +379,10 @@ func (cfg *apiConfig) handlerChangeAwardAmount(w http.ResponseWriter, r *http.Re
 	}
 
 	if newAwardAmount.Float64 == currentClaim.Award.Float64 {
-		respondWithError(w, http.StatusMethodNotAllowed,
-			"New award amount is same as old award amount; award amount must be different", err)
+		respondWithError(w,
+			http.StatusMethodNotAllowed,
+			fmt.Sprintf("New award amount: %.2f is same as existing amount: %.2f", newAwardAmount.Float64, currentClaim.Award.Float64),
+			err)
 		return
 	}
 
