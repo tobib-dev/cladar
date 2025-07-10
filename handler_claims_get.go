@@ -169,7 +169,7 @@ func (cfg *apiConfig) handlerGetPendingClaims(w http.ResponseWriter, r *http.Req
 	bearerToken, err := auth.GetBearerToken(r.Header)
 	if err != nil {
 		respondWithError(w, http.StatusBadRequest,
-			"Malformed request; Couldn't retrieve bearer token", err)
+			"Malformed header; Couldn't retrieve bearer token", err)
 		return
 	}
 

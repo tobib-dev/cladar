@@ -58,6 +58,13 @@ RETURNING *;
 DELETE FROM claims
 WHERE id = $1;
 
+-- name: CloseClaim :one
+UPDATE claims
+SET current_status = 'completed',
+    updated_at = NOW()
+WHERE id = $1
+RETURNING *;
+
 -- name: GetPendingClaims :many
 SELECT * FROM claims
 WHERE current_status = 'pending'

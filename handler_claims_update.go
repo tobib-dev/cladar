@@ -414,6 +414,58 @@ func (cfg *apiConfig) handlerChangeAwardAmount(w http.ResponseWriter, r *http.Re
 	})
 }
 
+func (cfg *apiConfig) handlerCompleteClaim(w http.ResponseWriter, r *http.Request) {
+	type Response struct {
+		Claims
+	}
+
+	claimIDString := r.PathValue("claimID")
+	claimID, err := uuid.Parse(claimIDString)
+	if err != nil {
+		respondWithError(w, http.StatusBadRequest, "Couldn't parse claimID", err)
+		return
+	}
+
+	bearerToken, err := auth.GetBearerToken(r.Header)
+	if err != nil {
+		respondWithError(w, http.StatusBadRequest,
+			"Malformed header; Couldn't get token", err)
+		return
+	}
+
+	user, err := cfg.db.GetUserFromToken(r.Context(), bearerToken)
+	if err != nil {
+		respondWithError(w, http.StatusUnauthorized, "Invalid token", err)
+		return
+	}
+	if user.ExpiresAt.Before(time.Now()) || user.RevokedAt.Valid {
+		respondWithError(w, http.StatusUnauthorized,
+			"Token expired or revoked; Please generate new token", err)
+		return
+	}
+
+	claim, err := cfg.db.CloseClaim(r.Context(), claimID)
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError,
+			"Couldn't complete claim", err)
+		return
+	}
+
+	awardString := GetAwardString(claim.Award)
+	respondWithJson(w, http.StatusOK, Response{
+		Claims: Claims{
+			ID:              claimID,
+			CustomerID:      claim.CustomerID,
+			AssignedAgentID: claim.AgentID,
+			ClaimType:       claim.ClaimType,
+			CreatedAt:       claim.CreatedAt,
+			UpdatedAt:       claim.UpdatedAt,
+			CurrentStatus:   string(claim.CurrentStatus),
+			AwardAmount:     awardString,
+		},
+	})
+}
+
 func GetAwardString(awardFloat sql.NullFloat64) string {
 	if !awardFloat.Valid {
 		return ""

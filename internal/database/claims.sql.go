@@ -129,6 +129,30 @@ func (q *Queries) ChangeClaimType(ctx context.Context, arg ChangeClaimTypeParams
 	return i, err
 }
 
+const closeClaim = `-- name: CloseClaim :one
+UPDATE claims
+SET current_status = 'completed',
+    updated_at = NOW()
+WHERE id = $1
+RETURNING id, customer_id, agent_id, claim_type, created_at, updated_at, current_status, award
+`
+
+func (q *Queries) CloseClaim(ctx context.Context, id uuid.UUID) (Claim, error) {
+	row := q.db.QueryRowContext(ctx, closeClaim, id)
+	var i Claim
+	err := row.Scan(
+		&i.ID,
+		&i.CustomerID,
+		&i.AgentID,
+		&i.ClaimType,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.CurrentStatus,
+		&i.Award,
+	)
+	return i, err
+}
+
 const createClaim = `-- name: CreateClaim :one
 INSERT INTO claims (id, customer_id, agent_id, claim_type, created_at, updated_at, current_status, award)
 VALUES (gen_random_uuid(), $1, $2, $3, NOW(), NOW(), 'pending', $4)

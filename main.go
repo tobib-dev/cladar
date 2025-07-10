@@ -84,6 +84,7 @@ func main() {
 	mux.HandleFunc("PUT /api/decline/claims/{claimID}", cfg.handlerDeclineClaim)
 	mux.HandleFunc("PUT /api/award/claims/{claimID}", cfg.handlerAwardClaim)
 	mux.HandleFunc("PUT /api/award/update/claims/{claimID}", cfg.handlerChangeAwardAmount)
+	mux.HandleFunc("PUT /api/award/complete/claims/{claimID}", cfg.handlerCompleteClaim)
 	mux.HandleFunc("DELETE /api/claims/{claimID}", cfg.handlerDeleteClaim)
 
 	// Get claims by status
