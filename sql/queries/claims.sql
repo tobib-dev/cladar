@@ -74,3 +74,8 @@ ORDER BY updated_at ASC;
 SELECT * FROM claims
 WHERE current_status = 'awarded'
 ORDER BY updated_at ASC;
+
+-- name: GetDeclinedClaims :many
+SELECT * FROM claims
+WHERE current_status = 'declined'
+ORDER BY updated_at ASC;

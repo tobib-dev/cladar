@@ -90,6 +90,7 @@ func main() {
 	// Get claims by status
 	mux.HandleFunc("GET /api/claims/pending", cfg.handlerGetPendingClaims)
 	mux.HandleFunc("GET /api/claims/awarded", cfg.handlerGetAwardedClaims)
+	mux.HandleFunc("GET /api/claims/declined", cfg.handlerGetDeclinedClaims)
 
 	mux.HandleFunc("POST /api/departments", cfg.handlerCreateDept)
 	mux.HandleFunc("GET /api/departments", cfg.handlerGetAllDepts)

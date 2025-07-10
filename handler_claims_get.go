@@ -219,6 +219,31 @@ func (cfg *apiConfig) handlerGetAwardedClaims(w http.ResponseWriter, r *http.Req
 	respondWithJson(w, http.StatusOK, claimSlice)
 }
 
+func (cfg *apiConfig) handlerGetDeclinedClaims(w http.ResponseWriter, r *http.Request) {
+	bearerToken, err := auth.GetBearerToken(r.Header)
+	if err != nil {
+		respondWithError(w, http.StatusBadRequest,
+			"Malformed header; Couldn't get token", err)
+		return
+	}
+
+	user, err := cfg.db.GetUserFromToken(r.Context(), bearerToken)
+	if err != nil {
+		respondWithError(w, http.StatusUnauthorized, "Invalid token", err)
+		return
+	}
+	if user.ExpiresAt.Before(time.Now()) || user.RevokedAt.Valid {
+		respondWithError(w, http.StatusUnauthorized,
+			"Token expired or revoked; Please generate new token", err)
+		return
+	}
+
+	claims, err := cfg.db.GetDeclinedClaims(r.Context())
+
+	claimSlice := GetClaimsArray(claims)
+	respondWithJson(w, http.StatusOK, claimSlice)
+}
+
 func GetClaimsArray(dbClaims []database.Claim) []Claims {
 	claims := make([]Claims, len(dbClaims))
 
