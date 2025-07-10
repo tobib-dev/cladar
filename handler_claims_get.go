@@ -165,6 +165,35 @@ func (cfg *apiConfig) handlerGetClaimsByAssignedAgent(w http.ResponseWriter, r *
 	respondWithJson(w, http.StatusOK, agentClaims)
 }
 
+func (cfg *apiConfig) handlerGetPendingClaims(w http.ResponseWriter, r *http.Request) {
+	bearerToken, err := auth.GetBearerToken(r.Header)
+	if err != nil {
+		respondWithError(w, http.StatusBadRequest,
+			"Malformed request; Couldn't retrieve bearer token", err)
+		return
+	}
+
+	user, err := cfg.db.GetUserFromToken(r.Context(), bearerToken)
+	if err != nil {
+		respondWithError(w, http.StatusUnauthorized, "Invalid token", err)
+		return
+	}
+	if user.ExpiresAt.Before(time.Now()) || user.RevokedAt.Valid {
+		respondWithError(w, http.StatusUnauthorized,
+			"Token expired or revoked; Please generate new token", err)
+		return
+	}
+
+	claims, err := cfg.db.GetPendingClaims(r.Context())
+	if err != nil {
+		respondWithError(w, http.StatusNotFound, "No pending claims", err)
+		return
+	}
+
+	claimsSlice := GetClaimsArray(claims)
+	respondWithJson(w, http.StatusOK, claimsSlice)
+}
+
 func GetClaimsArray(dbClaims []database.Claim) []Claims {
 	claims := make([]Claims, len(dbClaims))
 

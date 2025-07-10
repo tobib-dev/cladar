@@ -57,3 +57,8 @@ RETURNING *;
 -- name: DeleteClaim :exec
 DELETE FROM claims
 WHERE id = $1;
+
+-- name: GetPendingClaims :many
+SELECT * FROM claims
+WHERE current_status = 'pending'
+ORDER BY updated_at ASC;
