@@ -69,3 +69,8 @@ RETURNING *;
 SELECT * FROM claims
 WHERE current_status = 'pending'
 ORDER BY updated_at ASC;
+
+-- name: GetAwardedClaims :many
+SELECT * FROM claims
+WHERE current_status = 'awarded'
+ORDER BY updated_at ASC;
