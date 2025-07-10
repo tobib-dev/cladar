@@ -390,6 +390,44 @@ func (q *Queries) GetClaimByID(ctx context.Context, id uuid.UUID) (Claim, error)
 	return i, err
 }
 
+const getCompletedClaims = `-- name: GetCompletedClaims :many
+SELECT id, customer_id, agent_id, claim_type, created_at, updated_at, current_status, award FROM claims
+WHERE current_status = 'completed'
+ORDER BY updated_at ASC
+`
+
+func (q *Queries) GetCompletedClaims(ctx context.Context) ([]Claim, error) {
+	rows, err := q.db.QueryContext(ctx, getCompletedClaims)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Claim
+	for rows.Next() {
+		var i Claim
+		if err := rows.Scan(
+			&i.ID,
+			&i.CustomerID,
+			&i.AgentID,
+			&i.ClaimType,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.CurrentStatus,
+			&i.Award,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getDeclinedClaims = `-- name: GetDeclinedClaims :many
 SELECT id, customer_id, agent_id, claim_type, created_at, updated_at, current_status, award FROM claims
 WHERE current_status = 'declined'
